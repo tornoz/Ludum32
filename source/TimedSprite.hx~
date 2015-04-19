@@ -1,0 +1,58 @@
+package;
+
+
+
+import flixel.FlxG;
+import flixel.FlxObject;
+import flixel.FlxSprite;
+import flixel.util.FlxPoint;
+
+class TimedSprite extends FlxSprite {
+
+    public static var BUFFER_SIZE = 500; // in seconds
+    private var array:Array<FlxPoint>;
+    private var index = -1;
+    private var pos:FlxPoint;
+    
+    public var rewinding = false;
+    
+    public function new(X:Int, Y:Int){
+        array = new Array<FlxPoint>();
+        return super(X,Y);
+    }
+    
+    override public function update():Void {
+        //trace("update");
+        if(rewinding) {
+            //trace("rewinding from " + index);
+            //trace(array.length);
+            this.x = array[index].x;
+            this.y = array[index].y;
+            index--;
+        } else if ((index +1) < array.length) {
+            //trace("forwarding");
+            this.x = array[index].x;
+            this.y = array[index].y;
+            index++;
+        } else {
+            //trace("push to " + (index + 1));
+            push(new FlxPoint(this.x, this.y));
+        }
+        if(!rewinding) {
+            super.update();
+        }
+    }
+    
+    public function push(x:FlxPoint):Void {
+        array.push(x);
+        if (array.length -1 > BUFFER_SIZE) {
+            array.shift();
+        }
+        if(index < BUFFER_SIZE) {
+            index++;
+        }
+        
+    }
+    
+    
+}

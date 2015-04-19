@@ -1,0 +1,33 @@
+package;
+
+
+class TimeManager {
+
+    public var array:Array<TimedSprite>;
+
+    private static var instance:TimeManager = null;
+    
+    private function new(){
+        array = new Array<TimedSprite>();
+    }
+    
+    public static function getInstance():TimeManager {
+        if(instance == null) {
+            instance = new TimeManager();
+        }
+        return instance;
+    }
+    
+    public function startRewind() {
+        for(sprite in array) {
+            sprite.rewinding = true;  
+        }
+    }
+    
+    public function stopRewind() {
+        for(sprite in array) {
+            sprite.rewinding = false;  
+        }
+    }
+    
+}

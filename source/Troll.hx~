@@ -1,0 +1,111 @@
+package;
+
+
+
+import flixel.FlxG;
+import flixel.FlxObject;
+import flixel.FlxSprite;
+import flixel.group.FlxTypedGroup;
+import flixel.ui.FlxButton;
+import flixel.ui.FlxVirtualPad;
+import flixel.util.FlxSpriteUtil;
+import flixel.util.FlxTimer;
+import flixel.util.FlxPoint;
+import flixel.util.FlxColor;
+import flixel.util.FlxMath;
+import flixel.util.FlxRandom;
+
+class Troll extends TimedSprite {
+
+	var player:Player;
+    var angry = false;
+    
+    public var jumpWait:Float = 0;
+	public var jumpTime:Float = 0.1;
+	public var jumping = false;
+    
+	public function new(X:Int, Y:Int, player:Player){
+		super(X, Y);
+		this.player = player;
+		
+		loadGraphic("assets/images/troll.png", true, 48,48);
+		
+		setFacingFlip(FlxObject.LEFT, true, false);
+		setFacingFlip(FlxObject.RIGHT, false, false);
+		
+		animation.add("iddle", [0,1,2,1,0,1,2,3], 4);
+		animation.add("angry", [4,5],8);
+		animation.play("iddle");
+		
+		drag.x = drag.y = 350;
+		maxVelocity.set(200, 200);
+		//gibs.makeParticles(Reg.GIBS, 100, 10, true, 0.5);
+	}
+
+	
+	
+	override public function update():Void {
+		
+	    if(FlxMath.distanceBetween(this, player) < 120) {
+	        if(!angry) {
+	             angry = true;
+	             animation.play("angry");
+	        }
+	    } else {
+	         if(angry) {
+                 angry = false;
+                 animation.play("iddle");
+                 this.acceleration.x = 0;
+                 this.acceleration.y = 0;
+                 this.velocity.x = 0;
+                 this.velocity.y = 0;
+	        } 
+	    }
+	    if(angry) {
+	        jump();
+	    }
+		super.update();
+	}
+
+	public function jump():Void {
+	    jumpWait += FlxG.elapsed;
+		if(jumpWait > jumpTime) {
+			jumpWait = 0;
+			jumpTime = FlxRandom.floatRanged(0.2,0.4);
+			jumping = !jumping;
+			if(!jumping) {
+				//animation.play("iddle");
+				this.acceleration.x = 0;
+				this.acceleration.y = 0;
+				this.velocity.x = 0;
+				this.velocity.y = 0;
+			}
+			else {
+				//animation.play("jump");
+			}
+				
+		}
+		if(jumping) {
+			if(player.x > this.x && acceleration.x <= 0) {
+				acceleration.x += drag.x;
+				facing = FlxObject.RIGHT;
+			}
+			else if(player.x < this.x && acceleration.x >= 0) {
+				acceleration.x -= drag.x;
+				facing = FlxObject.LEFT;
+			}
+			if(player.y > this.y && acceleration.y <= 0) {
+				acceleration.y += drag.y;
+				facing = FlxObject.RIGHT;
+			}
+			else if(player.y < this.y && acceleration.y >= 0) {
+				acceleration.y -= drag.y;
+				facing = FlxObject.LEFT;
+			}
+			velocity.y -= (jumpTime/2 - jumpWait*1.5)*100; 
+		}
+	}
+
+
+
+}
